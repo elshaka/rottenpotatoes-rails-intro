@@ -1,8 +1,5 @@
 class MoviesController < ApplicationController
-
-  def movie_params
-    params.require(:movie).permit(:title, :rating, :description, :release_date)
-  end
+  before_action -> { remember_params params }, only: :index
 
   def show
     id = params[:id] # retrieve movie ID from URI route
@@ -43,4 +40,22 @@ class MoviesController < ApplicationController
     redirect_to movies_path
   end
 
+  private
+
+  def movie_params
+    params.require(:movie).permit(:title, :rating, :description, :release_date)
+  end
+
+  def remember_params(params)
+    if session[:params].present?
+      session[:params].merge!(params)
+      if session[:params] != params
+        flash.keep
+        redirect_to movies_path(params: session[:params])
+        return
+      end
+    else
+      session[:params] = params
+    end
+  end
 end
